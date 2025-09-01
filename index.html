@@ -4,50 +4,72 @@
   <meta charset="UTF-8">
   <title>🔥 Free Fire UID Tracker</title>
   <link rel="stylesheet" href="style.css">
-<script>
-  async function trackUID(event) {
-    event.preventDefault();
-    let uid = document.querySelector("input[name='uid']").value;
-    if (!uid) return;
+  <script>
+    async function trackUID(event) {
+      event.preventDefault();
+      let uid = document.querySelector("input[name='uid']").value;
+      if (!uid) return;
 
-    let res = await fetch("https://gagan-info-v1.vercel.app/info?uid=" + uid);
-    let info = await res.json();
+      let res = await fetch("https://gagan-info-v1.vercel.app/info?uid=" + uid);
+      let info = await res.json();
+      let player = info.playerData;
+      let guild = info.guildInfo;
+      let pet = info.petInfo;
 
-    // playerData
-    let player = info.playerData;
+      // Dates
+      let createAt = player.createAt ? new Date(parseInt(player.createAt) * 1000) : "N/A";
+      let lastLogin = player.lastLoginAt ? new Date(parseInt(player.lastLoginAt) * 1000) : "N/A";
+      let now = new Date();
+      let diff = (player.lastLoginAt) ? Math.floor((now - lastLogin) / 1000) : null;
 
-    // Convert timestamps
-    let createAt = player.createAt ? new Date(parseInt(player.createAt) * 1000) : "N/A";
-    let lastLogin = player.lastLoginAt ? new Date(parseInt(player.lastLoginAt) * 1000) : "N/A";
-    let now = new Date();
+      // Online status
+      let status = "N/A";
+      if (diff !== null) {
+        status = (diff <= 300) ? "🟢 Online" : 
+          `🔴 Offline (${diff >= 86400 ? Math.floor(diff/86400) + "d " : ""}${Math.floor((diff % 86400)/3600)}h ${Math.floor((diff % 3600)/60)}m ago)`;
+      }
 
-    let diff = (player.lastLoginAt) ? Math.floor((now - lastLogin) / 1000) : null;
+      // UI Cards
+      document.querySelector("#result").innerHTML = `
+        <div class="card player-card">
+          <h2>${player.nickname} <span class="level">Lvl ${player.level}</span></h2>
+          <p><b>UID:</b> ${player.accountId}</p>
+          <p><b>Region:</b> ${player.region}</p>
+          <p><b>Status:</b> <span class="status">${status}</span></p>
+        </div>
 
-    // Check status
-    let status = "N/A";
-    if (diff !== null) {
-      status = (diff <= 300) ? "🟢 Online" : 
-        `🔴 Offline (${diff >= 86400 ? Math.floor(diff/86400) + "d " : ""}${Math.floor((diff % 86400)/3600)}h ${Math.floor((diff % 3600)/60)}m ago)`;
+        <div class="card stats-card">
+          <h3>📊 Player Stats</h3>
+          <div class="stats-grid">
+            <div><b>Experience</b><br>${player.exp}</div>
+            <div><b>Rank Points</b><br>${player.rankingPoints}</div>
+            <div><b>Rank</b><br>${player.rank}</div>
+            <div><b>CS Rank</b><br>${player.csRank}</div>
+          </div>
+        </div>
+
+        <div class="card guild-card">
+          <h3>🏆 Guild Info</h3>
+          ${guild ? `
+            <p><b>Clan:</b> ${guild.clanName} (Lvl ${guild.clanLevel})</p>
+            <p><b>Members:</b> ${guild.memberNum}/${guild.capacity}</p>
+          ` : "<p>No guild data</p>"}
+        </div>
+
+        <div class="card pet-card">
+          <h3>🐾 Pet Info</h3>
+          ${pet ? `
+            <p><b>Pet ID:</b> ${pet.id}</p>
+            <p><b>Level:</b> ${pet.level}</p>
+            <p><b>Exp:</b> ${pet.exp}</p>
+          ` : "<p>No pet data</p>"}
+        </div>
+      `;
+
+      // Auto-refresh every 1 min
+      setTimeout(() => trackUID(event), 60000);
     }
-
-    // Update card
-    document.querySelector("#result").innerHTML = `
-      <div class="card">
-        <h2>${player.nickname} <span class="level">(Lvl ${player.level})</span></h2>
-        <p><b>UID:</b> ${player.accountId}</p>
-        <p><b>Region:</b> ${player.region}</p>
-        <p><b>Exp:</b> ${player.exp}</p>
-        <p><b>Rank Points:</b> ${player.rankingPoints}</p>
-        <p><b>Created At:</b> ${createAt instanceof Date ? createAt.toLocaleString() : createAt}</p>
-        <p><b>Last Login:</b> ${lastLogin instanceof Date ? lastLogin.toLocaleString() : lastLogin}</p>
-        <p class="status">${status}</p>
-      </div>
-    `;
-
-    // Auto-refresh every 1 min
-    setTimeout(() => trackUID(event), 60000);
-  }
-</script>
+  </script>
 </head>
 <body>
   <div class="container">
