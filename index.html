@@ -6,10 +6,11 @@
   <link rel="stylesheet" href="style.css">
   <script>
     async function trackUID(event) {
-      event.preventDefault();
+      if (event) event.preventDefault();
       let uid = document.querySelector("input[name='uid']").value;
       if (!uid) return;
 
+      // First request: player data
       let res = await fetch("https://gagan-info-v1.vercel.app/info?uid=" + uid);
       let info = await res.json();
       let player = info.playerData;
@@ -17,9 +18,9 @@
       let pet = info.petInfo;
 
       // Dates
+      let now = new Date();
       let createAt = player.createAt ? new Date(parseInt(player.createAt) * 1000) : "N/A";
       let lastLogin = player.lastLoginAt ? new Date(parseInt(player.lastLoginAt) * 1000) : "N/A";
-      let now = new Date();
       let diff = (player.lastLoginAt) ? Math.floor((now - lastLogin) / 1000) : null;
 
       // Online status
@@ -27,6 +28,41 @@
       if (diff !== null) {
         status = (diff <= 300) ? "🟢 Online" : 
           `🔴 Offline (${diff >= 86400 ? Math.floor(diff/86400) + "d " : ""}${Math.floor((diff % 86400)/3600)}h ${Math.floor((diff % 3600)/60)}m ago)`;
+      }
+
+      // 🎯 XP Tracker
+      let todayKey = "xp_start_" + uid + "_" + now.toDateString();
+      let xpStart = localStorage.getItem(todayKey);
+      if (!xpStart) {
+        localStorage.setItem(todayKey, player.exp);
+        xpStart = player.exp;
+      }
+      let xpGained = player.exp - xpStart;
+
+      // Clan Leader Data (second request if clan exists)
+      let clanLeaderCard = "";
+      if (guild && guild.captainId) {
+        let resLeader = await fetch("https://gagan-info-v1.vercel.app/info?uid=" + guild.captainId);
+        let leaderInfo = await resLeader.json();
+        let leader = leaderInfo.playerData;
+
+        let leaderLastLogin = leader.lastLoginAt ? new Date(parseInt(leader.lastLoginAt) * 1000) : "N/A";
+        let leaderDiff = (leader.lastLoginAt) ? Math.floor((now - leaderLastLogin) / 1000) : null;
+        let leaderStatus = "N/A";
+        if (leaderDiff !== null) {
+          leaderStatus = (leaderDiff <= 300) ? "🟢 Online" : 
+            `🔴 Offline (${leaderDiff >= 86400 ? Math.floor(leaderDiff/86400) + "d " : ""}${Math.floor((leaderDiff % 86400)/3600)}h ${Math.floor((leaderDiff % 3600)/60)}m ago)`;
+        }
+
+        clanLeaderCard = `
+          <div class="card leader-card">
+            <h3>👑 Clan Leader Info</h3>
+            <p><b>Name:</b> ${leader.nickname} (Lvl ${leader.level})</p>
+            <p><b>UID:</b> ${leader.accountId}</p>
+            <p><b>Region:</b> ${leader.region}</p>
+            <p><b>Status:</b> <span class="status">${leaderStatus}</span></p>
+          </div>
+        `;
       }
 
       // UI Cards
@@ -48,6 +84,15 @@
           </div>
         </div>
 
+        <div class="card xp-card">
+          <h3>⚡ XP Tracker (Today)</h3>
+          <div class="stats-grid">
+            <div><b>Starting XP</b><br>${xpStart}</div>
+            <div><b>Current XP</b><br>${player.exp}</div>
+            <div><b>XP Gained</b><br style="color:#00ff9d;">${xpGained}</div>
+          </div>
+        </div>
+
         <div class="card guild-card">
           <h3>🏆 Guild Info</h3>
           ${guild ? `
@@ -55,6 +100,8 @@
             <p><b>Members:</b> ${guild.memberNum}/${guild.capacity}</p>
           ` : "<p>No guild data</p>"}
         </div>
+
+        ${clanLeaderCard}
 
         <div class="card pet-card">
           <h3>🐾 Pet Info</h3>
@@ -67,7 +114,7 @@
       `;
 
       // Auto-refresh every 1 min
-      setTimeout(() => trackUID(event), 60000);
+      setTimeout(() => trackUID(), 60000);
     }
   </script>
 </head>
