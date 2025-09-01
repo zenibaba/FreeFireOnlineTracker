@@ -4,41 +4,50 @@
   <meta charset="UTF-8">
   <title>🔥 Free Fire UID Tracker</title>
   <link rel="stylesheet" href="style.css">
-  <script>
-    async function trackUID(event) {
-      event.preventDefault();
-      let uid = document.querySelector("input[name='uid']").value;
-      if (!uid) return;
+<script>
+  async function trackUID(event) {
+    event.preventDefault();
+    let uid = document.querySelector("input[name='uid']").value;
+    if (!uid) return;
 
-      let res = await fetch("https://gagan-info-v1.vercel.app/info?uid=" + uid);
-      let info = await res.json();
+    let res = await fetch("https://gagan-info-v1.vercel.app/info?uid=" + uid);
+    let info = await res.json();
 
-      // Convert timestamps
-      let createAt = new Date(info.createAt * 1000);
-      let lastLogin = new Date(info.lastLoginAt * 1000);
-      let now = new Date();
-      let diff = Math.floor((now - lastLogin) / 1000);
+    // playerData
+    let player = info.playerData;
 
-      // Check status
-      let status = (diff <= 300) ? "🟢 Online" : 
+    // Convert timestamps
+    let createAt = player.createAt ? new Date(parseInt(player.createAt) * 1000) : "N/A";
+    let lastLogin = player.lastLoginAt ? new Date(parseInt(player.lastLoginAt) * 1000) : "N/A";
+    let now = new Date();
+
+    let diff = (player.lastLoginAt) ? Math.floor((now - lastLogin) / 1000) : null;
+
+    // Check status
+    let status = "N/A";
+    if (diff !== null) {
+      status = (diff <= 300) ? "🟢 Online" : 
         `🔴 Offline (${diff >= 86400 ? Math.floor(diff/86400) + "d " : ""}${Math.floor((diff % 86400)/3600)}h ${Math.floor((diff % 3600)/60)}m ago)`;
-
-      // Update card
-      document.querySelector("#result").innerHTML = `
-        <div class="card">
-          <h2>${info.nickname} <span class="level">(Lvl ${info.level})</span></h2>
-          <p><b>UID:</b> ${info.accountId}</p>
-          <p><b>Region:</b> ${info.region}</p>
-          <p><b>Created At:</b> ${createAt.toLocaleString()}</p>
-          <p><b>Last Login:</b> ${lastLogin.toLocaleString()}</p>
-          <p class="status">${status}</p>
-        </div>
-      `;
-
-      // Auto-refresh every 1 min
-      setInterval(() => trackUID(event), 60000);
     }
-  </script>
+
+    // Update card
+    document.querySelector("#result").innerHTML = `
+      <div class="card">
+        <h2>${player.nickname} <span class="level">(Lvl ${player.level})</span></h2>
+        <p><b>UID:</b> ${player.accountId}</p>
+        <p><b>Region:</b> ${player.region}</p>
+        <p><b>Exp:</b> ${player.exp}</p>
+        <p><b>Rank Points:</b> ${player.rankingPoints}</p>
+        <p><b>Created At:</b> ${createAt instanceof Date ? createAt.toLocaleString() : createAt}</p>
+        <p><b>Last Login:</b> ${lastLogin instanceof Date ? lastLogin.toLocaleString() : lastLogin}</p>
+        <p class="status">${status}</p>
+      </div>
+    `;
+
+    // Auto-refresh every 1 min
+    setTimeout(() => trackUID(event), 60000);
+  }
+</script>
 </head>
 <body>
   <div class="container">
