@@ -1,78 +1,136 @@
+/* Global dark mode */
 body {
-  margin: 0;
-  padding: 0;
   font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg, #0d47a1, #1976d2);
-  color: white;
+  background: #0d1117;
+  color: #e6edf3;
+  margin: 0;
+  padding: 20px;
   display: flex;
   justify-content: center;
-  align-items: center;
   min-height: 100vh;
 }
 
 .container {
-  text-align: center;
-  width: 450px;
+  width: 80%;
+  max-width: 1000px;
 }
 
+/* Title */
 h1 {
-  font-size: 28px;
+  text-align: center;
+  font-size: 2rem;
   margin-bottom: 20px;
+  background: linear-gradient(90deg, #00c6ff, #0072ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
+/* Form */
 form {
   display: flex;
   justify-content: center;
-  gap: 10px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
-input {
+input[type="text"] {
   padding: 12px;
-  width: 70%;
-  border-radius: 12px;
   border: none;
+  border-radius: 10px 0 0 10px;
   outline: none;
-  font-size: 16px;
+  width: 60%;
+  font-size: 1rem;
+  min-width: 200px;
 }
 
 button {
   padding: 12px 20px;
   border: none;
-  border-radius: 12px;
-  background: #64b5f6;
-  color: white;
-  cursor: pointer;
+  background: #0072ff;
+  color: #fff;
   font-weight: bold;
+  cursor: pointer;
+  border-radius: 0 10px 10px 0;
   transition: 0.3s;
 }
 
 button:hover {
-  background: #42a5f5;
-  transform: scale(1.05);
+  background: #00c6ff;
 }
 
+/* Card style */
 .card {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
   padding: 20px;
-  margin-top: 20px;
-  backdrop-filter: blur(12px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-  text-align: left;
+  margin: 15px 0;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  transition: transform 0.2s;
 }
 
-.card h2 {
-  margin: 0 0 10px 0;
+.card:hover {
+  transform: translateY(-5px);
 }
 
+/* Player name & level */
 .level {
-  font-size: 14px;
-  color: #ffeb3b;
+  font-size: 0.9rem;
+  color: #00c6ff;
 }
 
+/* Status color */
 .status {
-  margin-top: 10px;
-  font-size: 18px;
   font-weight: bold;
+}
+.status:contains("Online") { color: #00ff9d; }
+.status:contains("Offline") { color: #ff4d4d; }
+
+/* Stats grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin-top: 10px;
+}
+.stats-grid div {
+  background: rgba(0,0,0,0.2);
+  padding: 12px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 0.95rem;
+}
+.stats-grid div b {
+  color: #00c6ff;
+}
+
+/* 📱 Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    width: 95%;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+  }
+
+  form {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    border-radius: 10px;
+    margin-bottom: 10px;
+  }
+
+  button {
+    width: 100%;
+    border-radius: 10px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr; /* stack stats */
+  }
 }
