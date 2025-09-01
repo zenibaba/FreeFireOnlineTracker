@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🔥 Free Fire UID Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <script>
+    async function trackUID(event) {
+      event.preventDefault();
+      let uid = document.querySelector("input[name='uid']").value;
+      if (!uid) return;
+
+      let res = await fetch("https://gagan-info-v1.vercel.app/info?uid=" + uid);
+      let info = await res.json();
+
+      // Convert timestamps
+      let createAt = new Date(info.createAt * 1000);
+      let lastLogin = new Date(info.lastLoginAt * 1000);
+      let now = new Date();
+      let diff = Math.floor((now - lastLogin) / 1000);
+
+      // Check status
+      let status = (diff <= 300) ? "🟢 Online" : 
+        `🔴 Offline (${diff >= 86400 ? Math.floor(diff/86400) + "d " : ""}${Math.floor((diff % 86400)/3600)}h ${Math.floor((diff % 3600)/60)}m ago)`;
+
+      // Update card
+      document.querySelector("#result").innerHTML = `
+        <div class="card">
+          <h2>${info.nickname} <span class="level">(Lvl ${info.level})</span></h2>
+          <p><b>UID:</b> ${info.accountId}</p>
+          <p><b>Region:</b> ${info.region}</p>
+          <p><b>Created At:</b> ${createAt.toLocaleString()}</p>
+          <p><b>Last Login:</b> ${lastLogin.toLocaleString()}</p>
+          <p class="status">${status}</p>
+        </div>
+      `;
+
+      // Auto-refresh every 1 min
+      setInterval(() => trackUID(event), 60000);
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>🔥 Free Fire UID Tracker</h1>
+    <form onsubmit="trackUID(event)">
+      <input type="text" name="uid" placeholder="Enter Free Fire UID" required>
+      <button type="submit">Track</button>
+    </form>
+    <div id="result"></div>
+  </div>
+</body>
+</html>
