@@ -11,7 +11,7 @@
       if (!uid) return;
 
       // First request: player data
-      let res = await fetch("https://gagan-info-v1.vercel.app/info?uid=" + uid);
+      let res = await fetch("https://info-api-murex.vercel.app/accinfo?key=OnyxOverlord1&uid=" + uid);
       let info = await res.json();
       let player = info.playerData;
       let guild = info.guildInfo;
@@ -42,7 +42,7 @@
       // Clan Leader Data (second request if clan exists)
       let clanLeaderCard = "";
       if (guild && guild.captainId) {
-        let resLeader = await fetch("https://gagan-info-v1.vercel.app/info?uid=" + guild.captainId);
+        let resLeader = await fetch("https://info-api-murex.vercel.app/accinfo?key=OnyxOverlord1&uid=" + guild.captainId);
         let leaderInfo = await resLeader.json();
         let leader = leaderInfo.playerData;
 
